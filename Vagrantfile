@@ -10,6 +10,23 @@ Vagrant.configure("2") do |config|
   config.vm.provision "docker"
   config.vm.provision "shell", inline: $dockercompose
 
+  # Provider for VirtualBox
+  config.vm.provider :virtualbox do |vb|
+    vb.memory = "1024"
+    vb.cpus = 2
+  end
+
+  # Provider for Docker
+  config.vm.provider :docker do |docker, override|
+    override.vm.box = nil
+    docker.image = "rofrano/vagrant-provider:ubuntu"
+    docker.remains_running = true
+    docker.has_ssh = true
+    docker.privileged = true
+    docker.volumes = ["/sys/fs/cgroup:/sys/fs/cgroup:rw"]
+    docker.create_args = ["--cgroupns=host"]
+  end
+
   config.vm.define "web" do |node|
     node.vm.network "private_network", type: "dhcp"
   end
